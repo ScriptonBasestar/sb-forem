@@ -10,7 +10,7 @@ fi
 
 BUILD_PLATFORMS="${BUILD_PLATFORMS:-linux/amd64,linux/arm64}"
 RUBY_VERSION="${RUBY_VERSION:-$(cat .ruby-version-next)}"
-IMAGE="ghcr.io/forem/ruby:${RUBY_VERSION}"
+IMAGE="ghcr.io/scriptonbasestar/ruby:${RUBY_VERSION}"
 
 if [ -z "${SKIP_PUSH:-}" ]; then
 	PUSH_FLAG="--push"
@@ -30,11 +30,35 @@ if [ -z "${EXTERNAL_QEMU:-}" ]; then
 		--credential yes
 fi
 
-# shellcheck disable=SC2086
-docker buildx build \
-	--platform "${BUILD_PLATFORMS}" \
-	-f Containerfile.base \
-	-t "${IMAGE}"\
-	${PUSH_FLAG:-} \
-	--build-arg RUBY_VERSION="${RUBY_VERSION}" \
-	.
+if [ -z "${SKIP_PUSH:-}" ]; then
+  # shellcheck disable=SC2086
+  echo docker buildx build \
+    --platform "${BUILD_PLATFORMS}" \
+    -f Containerfile.base \
+    -t "${IMAGE}"\
+    ${PUSH_FLAG:-} \
+    --build-arg RUBY_VERSION="${RUBY_VERSION}" \
+    .
+  docker buildx build \
+    --platform "${BUILD_PLATFORMS}" \
+    -f Containerfile.base \
+    -t "${IMAGE}"\
+    ${PUSH_FLAG:-} \
+    --build-arg RUBY_VERSION="${RUBY_VERSION}" \
+    .
+else
+  echo docker buildx build \
+    -f Containerfile.base \
+    -t "${IMAGE}"\
+    --load \
+    --build-arg RUBY_VERSION="${RUBY_VERSION}" \
+    .
+  # load local
+  docker buildx build \
+    -f Containerfile.base \
+    -t "${IMAGE}"\
+    --load \
+    --build-arg RUBY_VERSION="${RUBY_VERSION}" \
+    .
+fi
+
