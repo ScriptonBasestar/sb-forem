@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-: ${CONTAINER_REPO:="docker.io/scriptonbasestar"}
-: ${CONTAINER_APP:=sb-forem}
+: ${CONTAINER_REPO:="ghcr.io/scriptonbasestar"}
+: ${CONTAINER_APP:=forem}
 
 export DOCKER_BUILDKIT=1
 
@@ -102,13 +102,13 @@ function create_production_containers {
                --tag "${CONTAINER_REPO}"/"${CONTAINER_APP}":development .
 
   # Push images to Quay
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":builder
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":production
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":testing
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":development
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":$(date +%Y%m%d)
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":${BUILDKITE_COMMIT:0:7}
-  docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":latest
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":builder
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":production
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":testing
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":development
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":$(date +%Y%m%d)
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":${BUILDKITE_COMMIT:0:7}
+  # docker push "${CONTAINER_REPO}"/"${CONTAINER_APP}":latest
 
 }
 

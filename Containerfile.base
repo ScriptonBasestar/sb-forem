@@ -1,28 +1,82 @@
-ARG RUBY_VERSION=3.3.0
+ARG RUBY_VERSION=3.3.6
 ARG DEBIAN_VERSION=bullseye
 FROM public.ecr.aws/docker/library/ruby:${RUBY_VERSION}-slim-${DEBIAN_VERSION} AS ruby-upstream
 
-ARG NODE_MAJOR=20
-ARG YARN_VERSION=1
-RUN apt update && \
-    apt install -y \
+RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get -yq dist-upgrade
+
+# Change apt mirror
+# Infra AWS - aws
+# Infra local - kakao
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=tmpfs,target=/var/log \
+    apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
         curl \
         software-properties-common \
-        gnupg2 \
-        && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo "deb https://deb.nodesource.com/node_${NODE_MAJOR}.x $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/nodesource.list && \
-    apt update && \
-    apt install -y \
+        gnupg2
+
+ARG NODE_MAJOR=20
+ARG YARN_VERSION=1
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+    echo "deb https://deb.nodesource.com/node_${NODE_MAJOR}.x $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=tmpfs,target=/var/log \
+    apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+        nodejs \
         imagemagick \
         iproute2 \
         libjemalloc2 \
         less \
-        postgresql-client \
-        tzdata \
-        nodejs \
-        && \
-    apt clean
+        tzdata
+
+ARG PG_MAJOR
+RUN curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgres-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/postgres-archive-keyring.gpg] https://apt.postgresql.org/pub/repos/apt/" \
+    $(lsb_release -cs)-pgdg main $PG_MAJOR | tee /etc/apt/sources.list.d/postgres.list > /dev/null
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=tmpfs,target=/var/log \
+    apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+        libpq-dev \
+        postgresql-client
+
+
+# pkg-config,
+# libpixman-1-dev,
+# libcairo2-dev,
+# libpango1.0-dev
+#
+# are needed only on arm64: some nodejs dependency doesn't provide
+# pre-built binaries for that arch, and so falls back to building
+# from source, which then requires a few extra packages installed.
+#
+# Since we wipe out node_modules as part of this image after calling
+# the bundler, we don't need these headers (or their sofile counterparts)
+# in any of the other build stages.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=tmpfs,target=/var/log \
+    apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+    build-essential \
+    git \
+    libcurl4-openssl-dev \
+    libffi-dev \
+    libxml2-dev \
+    libxslt-dev \
+    libpcre3-dev \
+    pkg-config \
+    libpixman-1-dev \
+    libcairo2-dev \
+    libpango1.0-dev
+
+RUN apt clean && rm -rf /var/lib/apt/lists/*
+# RUN gem update --system
 
 RUN corepack enable
 

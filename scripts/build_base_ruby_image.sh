@@ -10,7 +10,7 @@ fi
 
 BUILD_PLATFORMS="${BUILD_PLATFORMS:-linux/amd64,linux/arm64}"
 RUBY_VERSION="${RUBY_VERSION:-$(cat .ruby-version-next)}"
-IMAGE="ghcr.io/scriptonbasestar/ruby:${RUBY_VERSION}"
+IMAGE="ghcr.io/scriptonbasestar/forem-ruby:${RUBY_VERSION}"
 
 if [ -z "${SKIP_PUSH:-}" ]; then
 	PUSH_FLAG="--push"

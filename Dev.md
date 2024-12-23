@@ -7,12 +7,12 @@
 3. build image and push
 
 ```bash
-ghcr.io/scriptonbasestar/ruby:{RUBY_VERSION}
-# docker.io/scriptonbasestar/forem-ruby:{RUBY_VERSION}
+ghcr.io/scriptonbasestar/forem-ruby:{RUBY_VERSION}
 
 allow personal token from organization
 
-SKIP_PUSH="what?" scripts/build_base_ruby_image.sh
+scripts/build_base_ruby_image.sh
+scripts/build_containers.sh
 ```
 
 ## Local Run

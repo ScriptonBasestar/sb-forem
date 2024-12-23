@@ -1,5 +1,5 @@
 ---
-name: Build ghcr.io/scriptonbasestar/ruby Container Image
+name: Build ghcr.io/scriptonbasestar/forem-ruby Container Image
 on:
   workflow_call:
   # Allow manual runs through GitHub GUI in case of emergency.

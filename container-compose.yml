@@ -1,6 +1,6 @@
 services:
   rails:
-    image: quay.io/forem/forem:development
+    image: ghcr.io/scriptonbasestar/sb-forem:development
     container_name: forem_rails
     ports:
       - "3000:3000"
@@ -31,7 +31,7 @@ services:
     command: [ "bash", "-c", "./scripts/entrypoint.sh bootstrap && bundle exec rails server -b 0.0.0.0 -p 3000"]
 
   bundle:
-    image: quay.io/forem/forem:development
+    image: ghcr.io/scriptonbasestar/sb-forem:development
     container_name: forem_bundle
     environment:
       RAILS_ENV: development
@@ -44,7 +44,7 @@ services:
     command: ["./scripts/bundle.sh"]
 
   yarn:
-    image: quay.io/forem/forem:development
+    image: ghcr.io/scriptonbasestar/sb-forem:development
     container_name: forem_yarn
     environment:
       RAILS_ENV: development
@@ -57,7 +57,7 @@ services:
     command: [ "bash", "-c", "yarn install --dev"]
 
   webpacker:
-    image: quay.io/forem/forem:development
+    image: ghcr.io/scriptonbasestar/sb-forem:development
     container_name: forem_webpacker
     depends_on:
       - rails
@@ -74,7 +74,7 @@ services:
     command: ["./bin/webpack-dev-server"]
 
   seed:
-    image: quay.io/forem/forem:development
+    image: ghcr.io/scriptonbasestar/sb-forem:development
     container_name: forem_seed
     depends_on:
       rails:
@@ -94,7 +94,7 @@ services:
     command: ["bundle", "exec", "rake","db:seed"]
 
   sidekiq:
-    image: quay.io/forem/forem:development
+    image: ghcr.io/scriptonbasestar/sb-forem:development
     container_name: forem_sidekiq
     depends_on:
       rails:
