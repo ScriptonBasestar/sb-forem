@@ -58,7 +58,7 @@ WORKDIR "${APP_HOME}"
 
 COPY --chown=${APP_UID}:${APP_GID} ./.ruby-version "${APP_HOME}"/
 COPY --chown=${APP_UID}:${APP_GID} ./Gemfile ./Gemfile.lock "${APP_HOME}"/
-COPY --chown=${APP_UID}:${APP_GID} ./vendor/cache "${APP_HOME}"/vendor/cache
+# COPY --chown=${APP_UID}:${APP_GID} ./vendor/cache "${APP_HOME}"/vendor/cache
 
 # Have to reset APP_CONFIG, which appears to be set by upstream images, to
 # avoid permission errors in the development/test images (which run bundle
@@ -68,11 +68,12 @@ COPY --chown=${APP_UID}:${APP_GID} ./vendor/cache "${APP_HOME}"/vendor/cache
 ENV BUNDLE_APP_CONFIG="${APP_HOME}/.bundle"
 RUN mkdir -p "${BUNDLE_APP_CONFIG}" && \
     touch "${BUNDLE_APP_CONFIG}/config" && \
-    chown -R "${APP_UID}:${APP_GID}" "${BUNDLE_APP_CONFIG}" && \
-    bundle config --local build.sassc --disable-march-tune-native && \
-    bundle config --local without development:test && \
-    BUNDLE_FROZEN=true bundle install --deployment --jobs 4 --retry 5 && \
-    find "${APP_HOME}"/vendor/bundle -name "*.c" -delete && \
+    chown -R "${APP_UID}:${APP_GID}" "${BUNDLE_APP_CONFIG}"
+RUN bundle config --local build.sassc --disable-march-tune-native && \
+    bundle config --local without development:test
+# RUN BUNDLE_FROZEN=true bundle install --deployment --jobs 4 --retry 5
+RUN BUNDLE_FROZEN=true bundle install --deployment --jobs 4 --retry 5
+RUN find "${APP_HOME}"/vendor/bundle -name "*.c" -delete && \
     find "${APP_HOME}"/vendor/bundle -name "*.o" -delete
 
 COPY --chown=${APP_UID}:${APP_GID} . "${APP_HOME}"

@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-: ${CONTAINER_REPO:="quay.io/forem"}
-: ${CONTAINER_APP:=forem}
+: ${CONTAINER_REPO:="docker.io/scriptonbasestar"}
+: ${CONTAINER_APP:=sb-forem}
 
 export DOCKER_BUILDKIT=1
 
