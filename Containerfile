@@ -218,8 +218,8 @@ RUN gem update --system && \
 #     find "${APP_HOME}"/vendor/bundle -name "*.o" -delete
 
 # Create a directory for the app code
-RUN mkdir -p /app
-WORKDIR /app
+RUN mkdir -p /workspaces
+WORKDIR /workspaces
 
 # Document that we're going to expose port 3000
 EXPOSE 3000
