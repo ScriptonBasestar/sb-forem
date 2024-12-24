@@ -3,9 +3,9 @@ x-app: &app
     target: development
     context: .
     args:
-      PG_MAJOR: '13'
+      PG_MAJOR: '15'
   # image: ghcr.io/scriptonbasestar/forem:1.0.0-development
-  image: ghcr.io/scriptonbasestar/forem:development  
+  image: ghcr.io/scriptonbasestar/forem:development
   environment: &env
     NODE_ENV: ${NODE_ENV:-development}
     RAILS_ENV: ${RAILS_ENV:-development}
@@ -98,7 +98,7 @@ services:
     command: bundle exec sidekiq
 
   postgres:
-    image: postgres:13
+    image: postgres:15
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER:-.}/.dockerdev/.psqlrc:/root/.psqlrc:ro
       - postgres:/var/lib/postgresql/data
@@ -113,7 +113,7 @@ services:
       interval: 5s
 
   redis:
-    image: redis:7.0-alpine
+    image: redis:7-alpine
     volumes:
       - redis:/data
     ports:
@@ -124,32 +124,19 @@ services:
       timeout: 3s
       retries: 30
 
-  # yarninstall:
-  #   <<: *app
-  #   command: yarn install
-  #   volumes:
-  #     - ${LOCAL_WORKSPACE_FOLDER:-.}:/app:cached
-  #     - bundle:/usr/local/bundle
-  #     - node_modules:/app/node_modules
-  #   environment:
-  #     <<: *env
-  #     YARN_CACHE_FOLDER: /app/node_modules/.yarn-cache
   yarninstall:
     image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_yarn
     environment:
-      RAILS_ENV: development
-      REDIS_SESSIONS_URL: redis://redis:6379
-      REDIS_SIDEKIQ_URL: redis://redis:6379
-      REDIS_URL: redis://redis:6379
-      DATABASE_URL: postgresql://forem:forem@db:5432/PracticalDeveloper_development
+      <<: *env
+      YARN_CACHE_FOLDER: /app/node_modules/.yarn-cache
     # volumes:
     #   - .:/opt/apps/forem:z
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER:-.}:/app:cached
       - bundle:/usr/local/bundle
       - node_modules:/app/node_modules
-    command: [ "bash", "-c", "yarn install"]
+    command: [ "yarn install"]
 
   esbuild:
     <<: *app

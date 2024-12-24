@@ -3,6 +3,13 @@
 
 set -eu
 
+: ${CONTAINER_REPO:="ghcr.io/scriptonbasestar"}
+: ${CONTAINER_APP:=forem-ruby}
+
+echo "CONTAINER_REPO: ${CONTAINER_REPO}"
+echo "CONTAINER_APP: ${CONTAINER_APP}"
+
+
 if [ "$(pwd)" != "$(git rev-parse --show-toplevel)" ]; then
 	echo "This script must be run from the root of the Forem repository!" > /dev/stderr
 	exit 1
@@ -10,7 +17,7 @@ fi
 
 BUILD_PLATFORMS="${BUILD_PLATFORMS:-linux/amd64,linux/arm64}"
 RUBY_VERSION="${RUBY_VERSION:-$(cat .ruby-version-next)}"
-IMAGE="ghcr.io/scriptonbasestar/forem-ruby:${RUBY_VERSION}"
+IMAGE="${CONTAINER_REPO}/${CONTAINER_APP}:${RUBY_VERSION}"
 
 if [ -z "${SKIP_PUSH:-}" ]; then
 	PUSH_FLAG="--push"
