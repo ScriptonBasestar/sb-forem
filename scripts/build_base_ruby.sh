@@ -25,19 +25,28 @@ fi
 
 IFS=',' read -ra BUILD_PLATFORMS_ARR <<< "${BUILD_PLATFORMS}"
 for platform in "${BUILD_PLATFORMS_ARR[@]}"; do
+  echo "Checking if image ${IMAGE} already exists for platform ${platform}..."
   if docker pull --platform "${platform}" "${IMAGE}"; then
     echo "Image ${IMAGE} already exists for platform ${platform}, but it will be overridden by this script." > /dev/stderr
   fi
 done
 
+echo "EXTERNAL_QEMU: ${EXTERNAL_QEMU:-}"
+# m1?? fail??
 if [ -z "${EXTERNAL_QEMU:-}" ]; then
+  echo "Setting up QEMU..."
+  echo docker run --rm --privileged multiarch/qemu-user-static \
+		--reset \
+		-p yes \
+		--credential yes
 	docker run --rm --privileged multiarch/qemu-user-static \
 		--reset \
 		-p yes \
 		--credential yes
 fi
 
-if [ -z "${SKIP_PUSH:-}" ]; then
+if [ ! -z "${SKIP_PUSH:-}" ]; then
+  echo 'build and push image'
   # shellcheck disable=SC2086
   echo docker buildx build \
     --platform "${BUILD_PLATFORMS}" \
@@ -54,6 +63,7 @@ if [ -z "${SKIP_PUSH:-}" ]; then
     --build-arg RUBY_VERSION="${RUBY_VERSION}" \
     .
 else
+  echo 'build and skip push image'
   echo docker buildx build \
     -f Containerfile.base \
     -t "${IMAGE}"\

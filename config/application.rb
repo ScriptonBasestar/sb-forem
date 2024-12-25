@@ -74,7 +74,7 @@ module PracticalDeveloper
 
     config.middleware.use Rack::Deflater
 
-    config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
+    config.i18n.load_path += Rails.root.glob("config/locales/**/*.yml")
 
     config.i18n.fallbacks = [:en]
 
@@ -104,5 +104,8 @@ module PracticalDeveloper
       end
       ReservedWords.all = [ReservedWords::BASE_WORDS + top_routes].flatten.compact.uniq
     end
+
+    ## custom migrate error
+    config.active_record.partial_inserts = false
   end
 end

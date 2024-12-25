@@ -1,6 +1,9 @@
 ARG RUBY_VERSION=3.3.6
 
-FROM ghcr.io/scriptonbasestar/forem-ruby:${RUBY_VERSION} AS base
+ARG CONTAINER_REPO="ghcr.io/scriptonbasestar"
+ARG CONTAINER_APP="forem-ruby"
+
+FROM ${CONTAINER_REPO}/forem-ruby:${RUBY_VERSION} AS base
 
 ## ==================================================================================================
 ## ==================================================================================================
@@ -24,11 +27,12 @@ RUN mkdir -p ${APP_HOME} && chown "${APP_UID}":"${APP_GID}" "${APP_HOME}" && \
     groupadd -g "${APP_GID}" "${APP_USER}" && \
     adduser --uid "${APP_UID}" --gid "${APP_GID}" --home "${APP_HOME}" "${APP_USER}"
 
-ENV DOCKERIZE_VERSION=v0.9.1
-RUN curl -fsSLO https://github.com/jwilder/dockerize/releases/download/"${DOCKERIZE_VERSION}"/dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
-    && rm dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
-    && chown root:root /usr/local/bin/dockerize
+# TODO move to base
+# ENV DOCKERIZE_VERSION=v0.9.1
+# RUN curl -fsSLO https://github.com/jwilder/dockerize/releases/download/"${DOCKERIZE_VERSION}"/dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
+#     && tar -C /usr/local/bin -xzvf dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
+#     && rm dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
+#     && chown root:root /usr/local/bin/dockerize
 
 USER "${APP_USER}"
 WORKDIR "${APP_HOME}"
@@ -71,12 +75,13 @@ RUN mkdir -p "${APP_HOME}"/public/{assets,images,packs,podcasts,uploads}
 # timeout, QEMU-based ones (as is the case with Docker BuildX for
 # cross-compiling) quite often can. This increased timeout should help
 # reduce false-negatives when building multiarch images.
-RUN echo 'httpTimeout: 300000' >> ~/.yarnrc.yml
+# RUN echo 'httpTimeout: 300000' >> ~/.yarnrc.yml
+RUN echo 'http.timeout=300000' >> ~/.npmrc
 
 # This is one giant step now because previously, removing node_modules to save
 # layer space was done in a later step, which is invalid in at least some
 # Docker storage drivers (resulting in Directory Not Empty errors).
-RUN NODE_ENV=production yarn install && \
+RUN NODE_ENV=production pnpm install && \
     RAILS_ENV=production NODE_ENV=production bundle exec rake assets:precompile && \
     rm -rf node_modules
 
@@ -162,7 +167,8 @@ COPY --from=builder --chown="${APP_USER}":"${APP_USER}" ${APP_HOME} ${APP_HOME}
 ## Bund install
 RUN ./scripts/bundle.sh
 ## Yarn install
-RUN yarn install --dev
+# RUN yarn install --dev
+RUN pnpm i
 
 # Document that we're going to expose port 3000
 EXPOSE 3000
@@ -218,8 +224,8 @@ RUN gem update --system && \
 #     find "${APP_HOME}"/vendor/bundle -name "*.o" -delete
 
 # Create a directory for the app code
-RUN mkdir -p /workspaces
-WORKDIR /workspaces
+RUN mkdir -p /app
+WORKDIR /app
 
 # Document that we're going to expose port 3000
 EXPOSE 3000

@@ -7,9 +7,7 @@
 3. build image and push
 
 ```bash
-ghcr.io/scriptonbasestar/forem-ruby:{RUBY_VERSION}
-
-allow personal token from organization
+export CONTAINER_REPO="ghcr.io/your_org/your_repo""
 
 scripts/build_base_ruby_image.sh
 scripts/build_containers.sh
@@ -18,16 +16,14 @@ scripts/build_containers.sh
 ## Local Run
 
 1. install dip
-  - gem install dip
-  - mac fail
+
+- gem install dip
+- rbenv rehash
+
 2. cp .env.sample .env
-3. run `dip up`
-
-## Local Dev
-
-gem install bundler
-bundle install
-yarn
-
-docker-compose up -f docker-compose.dev.yml
-honcho start -f Procfile.dev
+3. scripts/build_base_ruby_m1_local.sh
+4. scripts/build_containers_m1_local.sh
+5. dip bundle
+6. dip pnpm i
+7. `dip rake db:create db:migrate db:seed`
+8. `dip up`

@@ -1,6 +1,10 @@
 ARG RUBY_VERSION=3.3.6
-ARG DEBIAN_VERSION=bullseye
+ARG DEBIAN_VERSION=bookworm
+
 FROM public.ecr.aws/docker/library/ruby:${RUBY_VERSION}-slim-${DEBIAN_VERSION} AS ruby-upstream
+
+# This is provided by BuildKit
+ARG TARGETARCH
 
 RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get -yq dist-upgrade
 
@@ -18,7 +22,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         gnupg2
 
 ARG NODE_MAJOR=20
-ARG YARN_VERSION=1
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
     echo "deb https://deb.nodesource.com/node_${NODE_MAJOR}.x $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -74,6 +77,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libpixman-1-dev \
     libcairo2-dev \
     libpango1.0-dev
+
+
+ENV DOCKERIZE_VERSION=v0.9.1
+RUN curl -fsSLO https://github.com/jwilder/dockerize/releases/download/"${DOCKERIZE_VERSION}"/dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
+    && rm dockerize-linux-${TARGETARCH}-"${DOCKERIZE_VERSION}".tar.gz \
+    && chown root:root /usr/local/bin/dockerize
 
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 # RUN gem update --system

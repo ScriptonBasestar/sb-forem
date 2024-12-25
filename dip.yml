@@ -1,4 +1,4 @@
-version: '7.1'
+version: '8.0'
 
 # Define default environment variables to pass
 # to Docker Compose
@@ -56,10 +56,21 @@ interaction:
         compose:
           run_options: [ service-ports, use-aliases ]
 
-  yarn:
-    description: Run Yarn commands
+  rake:
+    description: Run Rake commands
     service: rails
-    command: yarn
+    command: bundle exec rake
+    subcommands:
+      s:
+        description: Run Rake command
+        service: rails
+#        compose:
+#          run_options: [ service-ports, use-aliases ]
+
+  pnpm:
+    description: Run Pnpm commands
+    service: rails
+    command: pnpm
     compose_run_options: [ no-deps ]
 
   psql:

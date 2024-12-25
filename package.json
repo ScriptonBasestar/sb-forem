@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Where programmers share ideas and help each other grow",
   "engines": {
-    "yarn": "1.22.18",
     "node": "20.x"
   },
   "main": "index.js",
@@ -154,6 +153,5 @@
     "react-colorful": "^5.6.1",
     "react-dates": "^21.8.0",
     "web-share-wrapper": "^0.2.2"
-  },
-  "packageManager": "yarn@4.1.0"
+  }
 }

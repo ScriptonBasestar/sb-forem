@@ -1,6 +1,6 @@
 services:
   rails:
-    image: ghcr.io/scriptonbasestar/sb-forem:development
+    image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_rails
     ports:
       - "3000:3000"
@@ -26,12 +26,12 @@ services:
       STATEMENT_TIMEOUT: 10000
       APP_DOMAIN: rails
     volumes:
-      - .:/opt/apps/forem:z
-    entrypoint: ["dockerize", "-wait", "tcp://db:5432", "-wait", "tcp://redis:6379", "-wait", "file:///opt/apps/forem/vendor/bundle/.bundle_finished", "-timeout", "2700s"]
+      - .:/app:z
+#    entrypoint: ["dockerize", "-wait", "tcp://db:5432", "-wait", "tcp://redis:6379", "-wait", "file:///opt/apps/forem/vendor/bundle/.bundle_finished", "-timeout", "2700s"]
     command: [ "bash", "-c", "./scripts/entrypoint.sh bootstrap && bundle exec rails server -b 0.0.0.0 -p 3000"]
 
   bundle:
-    image: ghcr.io/scriptonbasestar/sb-forem:development
+    image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_bundle
     environment:
       RAILS_ENV: development
@@ -40,11 +40,11 @@ services:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgresql://forem:forem@db:5432/PracticalDeveloper_development
     volumes:
-      - .:/opt/apps/forem:z
+      - .:/app:z
     command: ["./scripts/bundle.sh"]
 
   yarn:
-    image: ghcr.io/scriptonbasestar/sb-forem:development
+    image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_yarn
     environment:
       RAILS_ENV: development
@@ -53,11 +53,11 @@ services:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgresql://forem:forem@db:5432/PracticalDeveloper_development
     volumes:
-      - .:/opt/apps/forem:z
+      - .:/app:z
     command: [ "bash", "-c", "yarn install --dev"]
 
   webpacker:
-    image: ghcr.io/scriptonbasestar/sb-forem:development
+    image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_webpacker
     depends_on:
       - rails
@@ -69,12 +69,12 @@ services:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgresql://forem:forem@db:5432/PracticalDeveloper_development
     volumes:
-      - .:/opt/apps/forem:z
+      - .:/app:z
     entrypoint: ["dockerize", "-wait", "file:///opt/apps/forem/node_modules/.bin/webpack-dev-server", "-timeout", "300s"]
     command: ["./bin/webpack-dev-server"]
 
   seed:
-    image: ghcr.io/scriptonbasestar/sb-forem:development
+    image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_seed
     depends_on:
       rails:
@@ -90,11 +90,11 @@ services:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgresql://forem:forem@db:5432/PracticalDeveloper_development
     volumes:
-      - .:/opt/apps/forem:z
+      - .:/app:z
     command: ["bundle", "exec", "rake","db:seed"]
 
   sidekiq:
-    image: ghcr.io/scriptonbasestar/sb-forem:development
+    image: ghcr.io/scriptonbasestar/forem:development
     container_name: forem_sidekiq
     depends_on:
       rails:
@@ -110,11 +110,12 @@ services:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgresql://forem:forem@db:5432/PracticalDeveloper_development
     volumes:
-      - .:/opt/apps/forem:z
+      - .:/app:z
     command: ["bundle", "exec", "sidekiq","-c","2"]
 
   db:
-    image: postgres:11-alpine
+#    image: postgres:15-alpine
+    image: postgres:15
     container_name: forem_postgresql
     healthcheck:
       test: [ "CMD", "pg_isready", "-d" ,"forem", "-U", "forem" ]
@@ -131,7 +132,7 @@ services:
       - db_data:/var/lib/postgresql/data:Z
 
   redis:
-    image: redis:6.0.9-alpine
+    image: redis:7
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 20s

@@ -5,7 +5,8 @@ x-app: &app
     args:
       PG_MAJOR: '15'
   # image: ghcr.io/scriptonbasestar/forem:1.0.0-development
-  image: ghcr.io/scriptonbasestar/forem:development
+#  image: ghcr.io/scriptonbasestar/forem:development
+  image: ${CONTAINER_REPO:-ghcr.io/scriptonbasestar}/forem:development
   environment: &env
     NODE_ENV: ${NODE_ENV:-development}
     RAILS_ENV: ${RAILS_ENV:-development}
@@ -58,7 +59,7 @@ services:
       DATABASE_URL_TEST: postgres://postgres:postgres@postgres:5432
       CHROME_URL: http://chrome:3333
     volumes:
-      - ${LOCAL_WORKSPACE_FOLDER:-.}:/workspaces/forem:cached
+      - ${LOCAL_WORKSPACE_FOLDER:-.}:/app:cached
       - bundle:/usr/local/bundle
       - cypress:/root/.cache/Cypress
       - rails_cache:/workspaces/forem/tmp/cache
@@ -124,20 +125,6 @@ services:
       timeout: 3s
       retries: 30
 
-  yarninstall:
-    image: ghcr.io/scriptonbasestar/forem:development
-    container_name: forem_yarn
-    environment:
-      <<: *env
-      YARN_CACHE_FOLDER: /app/node_modules/.yarn-cache
-    # volumes:
-    #   - .:/opt/apps/forem:z
-    volumes:
-      - ${LOCAL_WORKSPACE_FOLDER:-.}:/app:cached
-      - bundle:/usr/local/bundle
-      - node_modules:/app/node_modules
-    command: [ "yarn install"]
-
   esbuild:
     <<: *app
     command: yarn build --watch
@@ -146,9 +133,6 @@ services:
       - bundle:/usr/local/bundle
       - node_modules:/app/node_modules
       - builds:/app/assets/builds
-    depends_on:
-      yarninstall:
-        condition: service_completed_successfully
     environment:
       <<: *env
       WEBPACKER_DEV_SERVER_HOST: 0.0.0.0
