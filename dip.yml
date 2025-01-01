@@ -88,7 +88,8 @@ provision:
   # You may include this command if you would like to remove all volumes
   # - dip compose down --volumes
   #
-  - dip compose up -d postgres
-  - dip compose up -d redis
-  - dip bash -c bin/setup
-  - dip rails db:test:prepare RAILS_ENV=test
+  default:
+    - dip compose up -d postgres
+    - dip compose up -d redis
+    - dip bash -c bin/setup
+    - dip rails db:test:prepare RAILS_ENV=test
