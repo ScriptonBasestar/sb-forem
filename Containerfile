@@ -21,7 +21,7 @@ ENV BUNDLER_VERSION=2.6.1 \
 
 RUN gem install -N bundler:"${BUNDLER_VERSION}"
 
-ENV APP_USER=forem APP_UID=1000 APP_GID=1000 APP_HOME=/opt/apps/forem \
+ENV APP_USER=forem APP_UID=1000 APP_GID=1000 APP_HOME=/app \
     LD_PRELOAD=libjemalloc.so.2
 RUN mkdir -p ${APP_HOME} && chown "${APP_UID}":"${APP_GID}" "${APP_HOME}" && \
     groupadd -g "${APP_GID}" "${APP_USER}" && \
@@ -104,7 +104,7 @@ FROM base AS production
 
 USER root
 
-ENV APP_USER=forem APP_UID=1000 APP_GID=1000 APP_HOME=/opt/apps/forem \
+ENV APP_USER=forem APP_UID=1000 APP_GID=1000 APP_HOME=/app \
     LD_PRELOAD=libjemalloc.so.2
 RUN mkdir -p ${APP_HOME} && chown "${APP_UID}":"${APP_GID}" "${APP_HOME}" && \
     groupadd -g "${APP_GID}" "${APP_USER}" && \

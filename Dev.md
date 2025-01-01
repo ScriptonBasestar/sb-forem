@@ -9,7 +9,16 @@
 ```bash
 export CONTAINER_REPO="ghcr.io/your_org/your_repo""
 
-scripts/build_base_ruby_image.sh
+# mac m1
+#export DOCKER_BUILDKIT=1
+#export DOCKER_CLI_EXPERIMENTAL=enabled
+#export BUILD_PLATFORMS="linux/arm64"
+#export RUBY_VERSION="${RUBY_VERSION:-$(cat .ruby-version-next)}"
+#export PUSH_FLAG="--push"
+#export IMAGE="test1"
+export SKIP_PUSH="true"
+
+scripts/build_base_ruby.sh
 scripts/build_containers.sh
 ```
 

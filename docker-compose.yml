@@ -127,7 +127,8 @@ services:
 
   esbuild:
     <<: *app
-    command: yarn build --watch
+#    command: yarn build --watch
+    command: pnpm build --watch
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER:-.}:/app:cached
       - bundle:/usr/local/bundle
